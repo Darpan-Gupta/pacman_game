@@ -12,6 +12,10 @@ class class_map
 public:
 	// constructer for initializing wall_texture, point_texture and destination rectangle parameters
 	class_map(SDL_Renderer* renderer);
+	~class_map() {
+		SDL_DestroyTexture(wall_texture);
+		SDL_DestroyTexture(point_texture);
+	};
 
 	// function to render map on renderer
 	void create_map(string* map, SDL_Renderer* renderer);

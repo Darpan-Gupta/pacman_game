@@ -11,6 +11,7 @@ class class_pacman
 public:
 	// constructor to initalize pacman_texture, pacman images to source rectangles, inital position and inital pacman shape
 	class_pacman(SDL_Renderer* renderer);
+	~class_pacman() { SDL_DestroyTexture(pacman_texture); };
 
 	// function to change the position and shape of pacman if any key is pressed and to maintain the position if any key is not pressed
 	void render_pacman(string* map, SDL_Renderer* renderer, SDL_Event* event);
@@ -27,9 +28,11 @@ private:
 	SDL_Rect pacman_shape_select;
 	SDL_Rect pacman_position;
 
+	char direction_of_pacman = 0;
 	bool fluctuater = true;
-};
+	int counter_to_slow = 0;
 
+};
 
 
 class_pacman::class_pacman(SDL_Renderer* renderer) {
@@ -93,11 +96,15 @@ class_pacman::class_pacman(SDL_Renderer* renderer) {
 	SDL_RenderCopy(renderer, pacman_texture, &pacman_circle, &pacman_position);
 	pacman_shape_select = pacman_circle;
 
+	
+
 }
 
 
 void class_pacman::render_pacman(string* map, SDL_Renderer* renderer, SDL_Event* event) {
 
+	/*  // this code is for manual speed of pacman.
+	
 	while (SDL_PollEvent(event)) {
 
 		if (event->type == SDL_QUIT) game_is_running = false;
@@ -166,6 +173,92 @@ void class_pacman::render_pacman(string* map, SDL_Renderer* renderer, SDL_Event*
 		SDL_RenderCopy(renderer, pacman_texture, &pacman_shape_select, &pacman_position);
 
 	}
+
+	*/
+	
+
+
+	while (SDL_PollEvent(event)) {
+
+		if (event->type == SDL_QUIT) game_is_running = false;
+
+		else if (event->type == SDL_KEYDOWN) {
+
+			switch (event->key.keysym.sym)
+			{
+			case SDLK_UP:
+				if (map[current_y_pacman - 1][current_x_pacman] != '#') {
+					direction_of_pacman = 'u';
+				}
+				break;
+			case SDLK_DOWN:
+				if (map[current_y_pacman + 1][current_x_pacman] != '#') {
+					direction_of_pacman = 'd';
+				}
+				break;
+			case SDLK_LEFT:
+				if (map[current_y_pacman][current_x_pacman - 1] != '#') {
+					direction_of_pacman = 'l';
+				}
+				break;
+			case SDLK_RIGHT:
+				if (map[current_y_pacman][current_x_pacman + 1] != '#') {
+					direction_of_pacman = 'r';
+				}
+				break;
+			default:
+				break;
+			}
+
+		}
+
+	}
+
+	counter_to_slow++;
+
+	if (counter_to_slow == 3) {
+		if (direction_of_pacman == 'u' && map[current_y_pacman - 1][current_x_pacman] != '#') {
+			current_y_pacman--;
+			if (fluctuater) pacman_shape_select = up[0];
+			else pacman_shape_select = up[1];
+		}
+
+		else if (direction_of_pacman == 'd' && map[current_y_pacman + 1][current_x_pacman] != '#') {
+			current_y_pacman++;
+			if (fluctuater) pacman_shape_select = down[0];
+			else pacman_shape_select = down[1];
+		}
+
+		else if (direction_of_pacman == 'l' && map[current_y_pacman][current_x_pacman - 1] != '#') {
+			current_x_pacman--;
+			if (fluctuater) pacman_shape_select = left[0];
+			else pacman_shape_select = left[1];
+		}
+
+		else if (direction_of_pacman == 'r' && map[current_y_pacman][current_x_pacman + 1] != '#') {
+			current_x_pacman++;
+			if (fluctuater) pacman_shape_select = right[0];
+			else pacman_shape_select = right[1];
+		}
+
+
+		if (map[current_y_pacman][current_x_pacman] == '.') {
+			map[current_y_pacman][current_x_pacman] = ' ';
+			score += 10;
+		}
+		if (score == 700) game_is_running = false;
+
+		pacman_position.x = x_block * current_x_pacman;
+		pacman_position.y = y_block * current_y_pacman;
+
+		// here two sdl_rendercopy (one now and one after while loop) are used because
+		// this one:
+		// to render any change in pacman position if any key is pressed
+		SDL_RenderCopy(renderer, pacman_texture, &pacman_shape_select, &pacman_position);
+
+		counter_to_slow = 0;
+	}
+
 	// to maintain the position of pacman if no key is pressed
 	SDL_RenderCopy(renderer, pacman_texture, &pacman_shape_select, &pacman_position);
 
