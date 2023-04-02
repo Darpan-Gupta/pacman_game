@@ -2,10 +2,9 @@
 
 #include<SDL.h>
 #include<SDL_image.h>
-#include<string>
 #include "stats.h"
-using namespace std;
 
+// map is accessed, first in y axis then in x axis like (y,x)
 
 class class_map
 {
@@ -18,7 +17,7 @@ public:
 	};
 
 	// function to render map on renderer
-	void create_map(string* map, SDL_Renderer* renderer);
+	void create_map(std::string* map, SDL_Renderer* renderer);
 
 private:
 	SDL_Texture* wall_texture = nullptr;
@@ -29,17 +28,17 @@ private:
 
 class_map::class_map(SDL_Renderer* renderer) {
 	wall_texture = IMG_LoadTexture(renderer, "./pacman_resources/wall.bmp");
-	point_texture = IMG_LoadTexture(renderer, "./pacman_resources/point.bmp");
+	point_texture = IMG_LoadTexture(renderer, "./pacman_resources/ball.png");
 
-	dstrect.x = 7; //  initial x coordinate
-	dstrect.y = 7; //  initial y coordinate
+	dstrect.x = 0; //  initial x coordinate
+	dstrect.y = 0; //  initial y coordinate
 	dstrect.w = x_wall_block; // width of rectangle
 	dstrect.h = y_wall_block; // height of rectangle
 };
 
 
 
-void class_map::create_map(string* map, SDL_Renderer* renderer) {
+void class_map::create_map(std::string* map, SDL_Renderer* renderer) {
 
 	for (int i = 0; i < blocks_in_y; i++)
 	{
@@ -58,12 +57,12 @@ void class_map::create_map(string* map, SDL_Renderer* renderer) {
 
 			dstrect.x += x_block;
 		}
-		dstrect.x = 7;
+		dstrect.x = 0;
 		dstrect.y += y_block;
 
 	}
 
-	dstrect.x = 7;
-	dstrect.y = 7;
+	dstrect.x = 0;
+	dstrect.y = 0;
 }
 

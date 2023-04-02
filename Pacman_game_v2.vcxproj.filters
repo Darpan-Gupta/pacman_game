@@ -35,5 +35,8 @@
     <ClInclude Include="splash_screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sounds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

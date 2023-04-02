@@ -4,7 +4,7 @@
 #include<SDL_image.h>
 #include<string>
 #include "stats.h"
-using namespace std;
+#include "sounds.h"
 
 class class_pacman
 {
@@ -14,7 +14,7 @@ public:
 	~class_pacman() { SDL_DestroyTexture(pacman_texture); };
 
 	// function to change the position and shape of pacman if any key is pressed and to maintain the position if any key is not pressed
-	void render_pacman(string* map, SDL_Renderer* renderer, SDL_Event* event);
+	void render_pacman(std::string* map, SDL_Renderer* renderer, SDL_Event* event);
 
 private:
 
@@ -28,9 +28,14 @@ private:
 	SDL_Rect pacman_shape_select;
 	SDL_Rect pacman_position;
 
-	char direction_of_pacman = 0;
+	char current_direction_of_pacman = 0;
+	char next_direction_of_pacman = 0;
+
+	// to fluctuate between the two images of pacman in one direction, will be used to provide a illusion of movement
 	bool fluctuater = true;
+	// variable to slow the speed of pacman
 	int counter_to_slow = 0;
+	int key_case_selection = 0;
 
 };
 
@@ -101,7 +106,7 @@ class_pacman::class_pacman(SDL_Renderer* renderer) {
 }
 
 
-void class_pacman::render_pacman(string* map, SDL_Renderer* renderer, SDL_Event* event) {
+void class_pacman::render_pacman(std::string* map, SDL_Renderer* renderer, SDL_Event* event) {
 
 	/*  // this code is for manual speed of pacman.
 	
@@ -184,58 +189,74 @@ void class_pacman::render_pacman(string* map, SDL_Renderer* renderer, SDL_Event*
 
 		else if (event->type == SDL_KEYDOWN) {
 
-			switch (event->key.keysym.sym)
-			{
-			case SDLK_UP:
-				if (map[current_y_pacman - 1][current_x_pacman] != '#') {
-					direction_of_pacman = 'u';
-				}
-				break;
-			case SDLK_DOWN:
-				if (map[current_y_pacman + 1][current_x_pacman] != '#') {
-					direction_of_pacman = 'd';
-				}
-				break;
-			case SDLK_LEFT:
-				if (map[current_y_pacman][current_x_pacman - 1] != '#') {
-					direction_of_pacman = 'l';
-				}
-				break;
-			case SDLK_RIGHT:
-				if (map[current_y_pacman][current_x_pacman + 1] != '#') {
-					direction_of_pacman = 'r';
-				}
-				break;
-			default:
-				break;
-			}
+			if (event->key.keysym.sym == SDLK_UP || event->key.keysym.sym == SDLK_w) key_case_selection = 1;
+			else if (event->key.keysym.sym == SDLK_DOWN || event->key.keysym.sym == SDLK_s) key_case_selection = 2;
+			else if (event->key.keysym.sym == SDLK_LEFT || event->key.keysym.sym == SDLK_a) key_case_selection = 3;
+			else if (event->key.keysym.sym == SDLK_RIGHT || event->key.keysym.sym == SDLK_d) key_case_selection = 4;
+			else key_case_selection = 0;
+			 
+
+			
 
 		}
 
 	}
 
+	switch (key_case_selection)
+	{
+	case 1:
+		next_direction_of_pacman = 'u';
+		break;
+
+	case 2:
+		next_direction_of_pacman = 'd';
+		break;
+
+	case 3:
+		next_direction_of_pacman = 'l';
+		break;
+
+	case 4:
+		next_direction_of_pacman = 'r';
+		break;
+
+	default:
+		break;
+	}
+
 	counter_to_slow++;
 
 	if (counter_to_slow == 3) {
-		if (direction_of_pacman == 'u' && map[current_y_pacman - 1][current_x_pacman] != '#') {
+
+		if (next_direction_of_pacman == 'u' && map[current_y_pacman - 1][current_x_pacman] != '#') current_direction_of_pacman = next_direction_of_pacman;
+
+		else if (next_direction_of_pacman == 'd' && map[current_y_pacman + 1][current_x_pacman] != '#') current_direction_of_pacman = next_direction_of_pacman;
+
+		else if (next_direction_of_pacman == 'l' && map[current_y_pacman][current_x_pacman - 1] != '#') current_direction_of_pacman = next_direction_of_pacman;
+
+		else if (next_direction_of_pacman == 'r' && map[current_y_pacman][current_x_pacman + 1] != '#') current_direction_of_pacman = next_direction_of_pacman;
+
+
+
+		if (current_direction_of_pacman == 'u' && map[current_y_pacman - 1][current_x_pacman] != '#') {
 			current_y_pacman--;
 			if (fluctuater) pacman_shape_select = up[0];
 			else pacman_shape_select = up[1];
 		}
 
-		else if (direction_of_pacman == 'd' && map[current_y_pacman + 1][current_x_pacman] != '#') {
+		else if (current_direction_of_pacman == 'd' && map[current_y_pacman + 1][current_x_pacman] != '#') {
 			current_y_pacman++;
 			if (fluctuater) pacman_shape_select = down[0];
 			else pacman_shape_select = down[1];
 		}
 
-		else if (direction_of_pacman == 'l' && map[current_y_pacman][current_x_pacman - 1] != '#') {
+		else if (current_direction_of_pacman == 'l' && map[current_y_pacman][current_x_pacman - 1] != '#') {
 			current_x_pacman--;
 			if (fluctuater) pacman_shape_select = left[0];
 			else pacman_shape_select = left[1];
 		}
 
-		else if (direction_of_pacman == 'r' && map[current_y_pacman][current_x_pacman + 1] != '#') {
+		else if (current_direction_of_pacman == 'r' && map[current_y_pacman][current_x_pacman + 1] != '#') {
 			current_x_pacman++;
 			if (fluctuater) pacman_shape_select = right[0];
 			else pacman_shape_select = right[1];
@@ -245,11 +266,17 @@ void class_pacman::render_pacman(string* map, SDL_Renderer* renderer, SDL_Event*
 		if (map[current_y_pacman][current_x_pacman] == '.') {
 			map[current_y_pacman][current_x_pacman] = ' ';
 			score += 10;
+			play_coins_sound();
 		}
-		if (score == 700) game_is_running = false;
+		if (score == max_score) {
+			game_is_running = false;
+			play_death_sound();
+		}
 
 		pacman_position.x = x_block * current_x_pacman;
 		pacman_position.y = y_block * current_y_pacman;
+		fluctuater = !fluctuater;
+		
 
 		// here two sdl_rendercopy (one now and one after while loop) are used because
 		// this one:
@@ -258,7 +285,7 @@ void class_pacman::render_pacman(string* map, SDL_Renderer* renderer, SDL_Event*
 
 		counter_to_slow = 0;
 	}
-
+	// and this one:
 	// to maintain the position of pacman if no key is pressed
 	SDL_RenderCopy(renderer, pacman_texture, &pacman_shape_select, &pacman_position);
 
